@@ -33,4 +33,10 @@ class Bid(models.Model):
                         
 
 class Comment(models.Model):
-    pass # TODO
+    auction_listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments") # Corrected typo
+    text_comment =  models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True) # Corrected Typo
+
+    def __str__(self):
+        return f"{self.user} commented: {self.text_comment} on {self.auction_listing}"
