@@ -1,7 +1,16 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+<h2>Active Listings</h2>
 
-    TODO
+{% for listing in listings %}
+    <div class="card m-2 p-3">
+        <h4>{{ listing.title }}</h4>
+        <p>{{ listing.description }}</p>
+        <strong>Starting bid: ${{ listing.starting_bid }}</strong>
+    </div>
+{% empty %}
+    <p>No active listings available.</p>
+{% endfor %}
+
 {% endblock %}
