@@ -66,6 +66,12 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+def closed_listings(request):
+    listings = AuctionListing.objects.filter(is_active=False)
+    return render(request, "auctions/closed_listings.html", {
+        "listings" : listings
+    })
+
 @login_required
 def create_listing(request):
     if request.method == "POST":
