@@ -1,0 +1,12 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2>{{ listing.title }}</h2>
+    <img src="{{ listing.image_url }}" alt="{{ listing.title }}" style="width: 400px; height: 400px; object-fit: cover; border:1px solid #ddd; border-radius:4px;">
+    <p><strong>Price:</strong> ${{ listing.starting_bid }}</p>
+    <p><strong>Description:</strong> {{ listing.description }}</p>
+    <p><strong>Category:</strong> {% if listing.category %}{{ listing.category.name }}{% else %}None{% endif %}</p>
+    <p><small class="text-muted">Created at: {{ listing.creation_date|date:"F j, Y, g:i a" }}</small></p>
+</div>
+{% endblock %}

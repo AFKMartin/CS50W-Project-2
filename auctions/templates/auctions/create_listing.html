@@ -1,32 +1,92 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
 
 {% block body %}
+<h2>Create Listing</h2>
 
-<h2>Create a New Listing</h2>
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-info">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<!-- CSS for width input + image preview -->
+<style>
+#imagePreview, .full-width-input {
+    max-width: 640px;  
+    width: 100%;       
+}
+#imagePreview {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px;
+    max-height: 400px; 
+}
+</style>
 
 <form action="{% url 'create_listing' %}" method="post">
     {% csrf_token %}
-    
-    <label>Title</label>
-    <input class="form-control" type="text" name="title">
 
-    <label>Description</label>
-    <textarea class="form-control" name="description"></textarea>
+    <!-- Title -->
+    <div class="form-group">
+        <label>Title:<span class="req" style="color: red">*</span></label>
+        <input autofocus class="form-control full-width-input" type="text" name="title" required>
+    </div>
 
-    <label>Starting Bid</label>
-    <input class="form-control" type="number" step="0.01" name="starting_bid">
+    <!-- Image URL & Preview -->
+    <div class="form-group">
+        <label>Image URL:</label>
+        <input class="form-control full-width-input" type="url" name="image_url" id="imageInput" placeholder="">
 
-    <label>Image URL</label> <!-- Remember this has to be optional -->
-    <input class="form-control" type="url" name="image_url">
+        <div id="imagePreviewContainer" class="mt-2">
+            <img id="imagePreview" src="{% static 'auctions/no-image-640-400.jpg' %}" alt="No image available">
+        </div>
+    </div>
 
-    <label>Category</label>
-    <select class="form-control" name="category">
-        <option value="">None</option>
-        {% for category in categories %}
-        <option value="{{ category.id }}">{{ category.name }}</option>
-        {% endfor %}
-    </select>
+    <!-- Description -->
+    <div class="form-group">
+        <label>Description:<span class="req" style="color: red">*</span></label>
+        <textarea class="form-control full-width-input" name="description" required></textarea>
+    </div>
 
-    <button class="btn btn-primary mt-3" type="submit">Create Listing</button>
+    <!-- Starting Bid -->
+    <div class="form-group">
+        <label>Starting Bid:<span class="req" style="color: red">*</span></label>
+        <input class="form-control full-width-input" type="number" step="0.01" name="starting_bid" required>
+    </div>
+
+    <!-- Category -->
+    <div class="form-group">
+        <label>Category:<span class="req" style="color: red">*</span></label>
+        <select class="form-control full-width-input" name="category" required>
+            <option value="">-- select category --</option>
+            {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <br>
+    <button class="btn btn-primary" type="submit">Create Listing</button>
 </form>
+
+<!-- Live Image Preview -->
+<script>
+document.getElementById("imageInput").addEventListener("input", function () {
+    const url = this.value;
+    const img = document.getElementById("imagePreview");
+
+    if (!url) {
+        img.src = "{% static 'auctions/no-image-640-400.jpg' %}";
+        return;
+    }
+
+    img.src = url;
+
+    img.onerror = function () {
+        img.src = "{% static 'auctions/no-image-640-400.jpg' %}";
+    };
+});
+</script>
+
 {% endblock %}
