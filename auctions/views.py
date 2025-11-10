@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import AuctionListing, Category
+from .models import AuctionListing, Category, Watchlist
 
 from .models import User
 
@@ -66,11 +66,29 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-def closed_listings(request):
-    listings = AuctionListing.objects.filter(is_active=False)
-    return render(request, "auctions/closed_listings.html", {
-        "listings" : listings
-    })
+@login_required
+def close_listing(request, listing_id):
+    listing = get_object_or_404(AuctionListing, pk=listing_id)
+
+    # Only owner can close the listing
+    if listing.owner != request.user:
+        return HttpResponse("Unauthorized", status=401)
+
+    listing.is_active = False
+    listing.save()
+
+    return redirect("listing_detail", listing_id=listing_id)
+
+@login_required
+def delete_listing(request, listing_id):
+    listing = get_object_or_404(AuctionListing, pk=listing_id)
+
+    # Only owner can delete
+    if listing.owner != request.user:
+        return HttpResponse("Unauthorized", status=401)
+
+    listing.delete()
+    return redirect("index")
 
 @login_required
 def create_listing(request):
@@ -115,6 +133,29 @@ def watchlist(request):
 
 def listing_detail(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
+    
+    # Determine if the user is watching this listing
+    is_watching = False
+    if request.user.is_authenticated:
+        is_watching = Watchlist.objects.filter(user=request.user, listing=listing).exists()
+
     return render(request, "auctions/listing_detail.html", {
-        "listing": listing
+        "listing": listing,
+        "is_watching": is_watching
     })
+
+@login_required
+def toggle_watchlist(request, listing_id):
+    listing = get_object_or_404(AuctionListing, pk=listing_id)
+    
+    # Check if alredy in my watchlist
+    if Watchlist.objects.filter(user=request.user, listing=listing).exists():
+        Watchlist.objects.filter(user=request.user, listing=listing).delete()
+    else:
+        Watchlist.objects.create(user=request.user, listing=listing)
+
+    return redirect("listing_detail", listing_id=listing_id)
+
+def closed_listings(request):
+    listings = AuctionListing.objects.filter(is_active=False)
+    return render(request, "auctions/closed_listings.html", {"listings": listings})
