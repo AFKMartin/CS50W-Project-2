@@ -1,4 +1,9 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'auctions/styles.css' %}">
+{% endblock %}
 
 {% block body %}
 
@@ -10,14 +15,11 @@
         <!-- Card header (Title + Actions) -->
         <div class="card-header bg-light text-dark d-flex justify-content-between align-items-center">
 
-            <!-- Title -->
             <h5 class="mb-0">{{ listing.title }}</h5>
 
-            <!-- Actions -->
             <div class="d-flex align-items-center">
                 {% if user.is_authenticated %}
-                
-                    <!-- Watchlist button -->
+                    
                     {% if is_watching %}
                         <a href="{% url 'toggle_watchlist' listing.id %}" class="btn btn-sm btn-outline-secondary me-2">
                             Remove Watchlist
@@ -28,7 +30,6 @@
                         </a>
                     {% endif %}
 
-                    <!-- Close + Delete (only for owner) -->
                     {% if user == listing.owner %}
                         <a href="{% url 'close_listing' listing.id %}" class="btn btn-sm btn-outline-warning me-2">
                             Close
@@ -74,26 +75,5 @@
         </div>
     </div>
 </div>
-
-<!-- CSS for spacing and styling TODO added to the CSS, I'm lazy will do it tomorrow -->
-<style>
-.listing-image {
-    margin-right: 30px; 
-    margin-bottom: 10px;
-    flex-shrink: 0; 
-}
-
-.listing-image img {
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.listing-info {
-    flex-grow: 1;
-}
-</style>
 
 {% endblock %}

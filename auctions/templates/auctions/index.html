@@ -1,4 +1,9 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'auctions/styles.css' %}">
+{% endblock %}
 
 {% block body %}
 
@@ -51,14 +56,12 @@
         <!-- Card body -->
         <div class="card-body d-flex flex-wrap align-items-start">
 
-            <!-- Image -->
+            <!-- Image --> 
             <div class="listing-image">
                 {% if listing.image_url %}
                     <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
                 {% else %}
-                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width:300px; height:300px;">
-                        No Image
-                    </div>
+                    <div class="no-image">No Image</div>
                 {% endif %}
             </div>
 
@@ -83,26 +86,5 @@
     <p>No active listings available.</p>
 {% endfor %}
 </div>
-
-<!-- CSS for spacing To my me of the future: ADD IT TO THE CSS FOR THE LOVE OF GOD DEALING WITH THIS HERE IS ANNOYING THANKS -->
-<style>
-.listing-image {
-    margin-right: 30px; 
-    margin-bottom: 10px;
-    flex-shrink: 0; 
-}
-
-.listing-image img {
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.listing-info {
-    flex-grow: 1;
-}
-</style>
 
 {% endblock %}

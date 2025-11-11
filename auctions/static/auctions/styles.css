@@ -1,3 +1,42 @@
-body {
-    padding: 10px;
+img {
+    max-width: none !important;
+    height: auto !important;
+}
+
+.card {
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.listing-image {
+    width: 300px;
+    height: 300px;
+    margin-right: 30px;
+    margin-bottom: 10px;
+    flex-shrink: 0; /* Prevent shrinking in flexbox */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.listing-image img {
+    width: 300px !important;   
+    height: 300px !important;  
+    object-fit: cover;         
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: block;
+}
+
+.listing-info {
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.card-header a {
+    font-weight: 600;
+}
+
+.card-header .btn {
+    margin-left: 5px;
 }
