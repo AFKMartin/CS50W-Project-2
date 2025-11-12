@@ -126,6 +126,14 @@ def categories(request):
         "categories": categories
     })
 
+@login_required
+def category_listings(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    listings = AuctionListing.objects.filter(category=category, is_active=True)
+    return render(request, "auctions/category_listings.html", {
+        "category": category,
+        "listings": listings
+    })
 
 @login_required
 def watchlist(request):
