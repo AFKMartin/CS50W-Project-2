@@ -79,6 +79,12 @@ def close_listing(request, listing_id):
 
     return redirect("listing_detail", listing_id=listing_id)
 
+def closed_listings(request):
+    closed_auctions = AuctionListing.objects.filter(active=False)
+    return render(request, "auctions/closed_listings.html", {
+        "listings": closed_auctions
+    })
+
 @login_required
 def delete_listing(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
@@ -137,7 +143,14 @@ def category_listings(request, category_id):
 
 @login_required
 def watchlist(request):
-    return render(request, "auctions/watchlist.html")
+    watched_listings = AuctionListing.objects.filter(
+        watchlisted_by__user=request.user
+    )
+
+    return render(request, "auctions/watchlist.html", {
+        "listings": watched_listings
+    })
+
 
 def listing_detail(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
@@ -154,16 +167,15 @@ def listing_detail(request, listing_id):
 
 @login_required
 def toggle_watchlist(request, listing_id):
-    listing = get_object_or_404(AuctionListing, pk=listing_id)
-    
-    # Check if alredy in my watchlist
-    if Watchlist.objects.filter(user=request.user, listing=listing).exists():
-        Watchlist.objects.filter(user=request.user, listing=listing).delete()
-    else:
-        Watchlist.objects.create(user=request.user, listing=listing)
+    listing = get_object_or_404(AuctionListing, id=listing_id)
 
-    return redirect("listing_detail", listing_id=listing_id)
+    watch_entry, created = Watchlist.objects.get_or_create(
+        user=request.user,
+        listing=listing
+    )
 
-def closed_listings(request):
-    listings = AuctionListing.objects.filter(is_active=False)
-    return render(request, "auctions/closed_listings.html", {"listings": listings})
+    if not created:
+        # Ya existía → el usuario quiere quitarlo
+        watch_entry.delete()
+
+    return HttpResponseRedirect(reverse("listing_detail", args=[listing_id]))
