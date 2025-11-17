@@ -80,7 +80,7 @@ def close_listing(request, listing_id):
     return redirect("listing_detail", listing_id=listing_id)
 
 def closed_listings(request):
-    closed_auctions = AuctionListing.objects.filter(active=False)
+    closed_auctions = AuctionListing.objects.filter(is_active=False)
     return render(request, "auctions/closed_listings.html", {
         "listings": closed_auctions
     })
@@ -175,7 +175,6 @@ def toggle_watchlist(request, listing_id):
     )
 
     if not created:
-        # Ya existía → el usuario quiere quitarlo
         watch_entry.delete()
 
     return HttpResponseRedirect(reverse("listing_detail", args=[listing_id]))
