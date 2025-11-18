@@ -7,7 +7,7 @@
 
 {% block body %}
 
-<h2>Active Listings</h2>
+<h2>Category: "{{ category.name }}"</h2>
 
 <div class="container">
 {% for listing in listings %}
@@ -83,7 +83,7 @@
         </div>
     </div>
 {% empty %}
-    <p>No active listings available.</p>
+    <p>No listings found for this category.</p>
 {% endfor %}
 </div>
 

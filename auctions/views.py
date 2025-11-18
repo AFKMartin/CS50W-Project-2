@@ -10,9 +10,19 @@ from .models import User
 
 def index(request):
     active_listings = AuctionListing.objects.filter(is_active=True)
+
+    watching = []    
+
+    if request.user.is_authenticated:
+        watching = AuctionListing.objects.filter(
+            watchlisted_by__user=request.user
+        )
+
     return render(request, "auctions/index.html", {
-        "listings": active_listings
+        "listings": active_listings,
+        "watching": watching
     })
+
 
 
 def login_view(request):
@@ -80,7 +90,7 @@ def close_listing(request, listing_id):
     return redirect("listing_detail", listing_id=listing_id)
 
 def closed_listings(request):
-    closed_auctions = AuctionListing.objects.filter(is_active=False)
+    closed_auctions = AuctionListing.objects.filter(is_active=False) # Why the hell did I typo this
     return render(request, "auctions/closed_listings.html", {
         "listings": closed_auctions
     })
@@ -134,11 +144,17 @@ def categories(request):
 
 @login_required
 def category_listings(request, category_id):
-    category = get_object_or_404(Category, pk=category_id)
+    watching = []
+    if request.user.is_authenticated:
+        watching = AuctionListing.objects.filter(watchlisted_by__user=request.user)
+        
+    category = Category.objects.get(id=category_id)
     listings = AuctionListing.objects.filter(category=category, is_active=True)
+    
     return render(request, "auctions/category_listings.html", {
         "category": category,
-        "listings": listings
+        "listings": listings,
+        "watching": watching
     })
 
 @login_required
@@ -177,4 +193,5 @@ def toggle_watchlist(request, listing_id):
     if not created:
         watch_entry.delete()
 
-    return HttpResponseRedirect(reverse("listing_detail", args=[listing_id]))
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER", reverse("index")))
+
