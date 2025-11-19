@@ -23,8 +23,6 @@ def index(request):
         "watching": watching
     })
 
-
-
 def login_view(request):
     if request.method == "POST":
 
@@ -44,11 +42,9 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
@@ -80,10 +76,14 @@ def register(request):
 def close_listing(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
 
-    # Only owner can close the listing
     if listing.owner != request.user:
         return HttpResponse("Unauthorized", status=401)
+    
+    # Find the highest Bid
+    highest_bid = listing.bids.order_by("-amount").first()
+    listing.winner = highest_bid.user if highest_bid else None # In case no one Bid
 
+    # Set listing active to false
     listing.is_active = False
     listing.save()
 

@@ -30,7 +30,7 @@
                 </a>
                 {% endif %}
 
-                {% if user == listing.owner %}
+                {% if user == listing.owner and listing.is_active %}
                 <a href="{% url 'close_listing' listing.id %}" class="btn btn-sm btn-outline-warning me-2">
                     Close
                 </a>
@@ -60,6 +60,18 @@
             <!-- Listing Info -->
             <div class="listing-info">
                 <p><strong>Current price:</strong> ${{ listing.starting_bid }}</p>
+
+                <!-- Show winner if auction closed -->
+                {% if not listing.is_active %}
+                <div class="alert alert-info mt-3">
+                    {% if listing.winner %}
+                        Winner: <strong>{{ listing.winner.username }}</strong>
+                    {% else %}
+                        No bids were placed.
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 {% if user.is_authenticated and listing.is_active %}
                 <div class="mt-3">
                     <!-- Bid form -->
