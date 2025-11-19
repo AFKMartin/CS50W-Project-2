@@ -195,3 +195,48 @@ def toggle_watchlist(request, listing_id):
 
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", reverse("index")))
 
+@login_required
+def place_bid(request, listing_id):
+    listing = get_object_or_404(AuctionListing, pk=listing_id)
+    
+    if request.method == "POST":
+        bid_raw = request.POST.get("bid_amount")
+
+        # Check if bid is null
+        if not bid_raw:
+            return render(request, "auctions/listing_detail.html", {
+                "listing": listing,
+                "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
+                "error_message": "Please enter a bid amount."
+            }) 
+        
+        try:
+            bid_amount = float(bid_raw)
+        except ValueError:
+            return render(request, "auctions/listing_detail.html", {
+                "listing": listing,
+                "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
+                "error_message": "Invalid bid value."
+            })
+
+        current_price = float(listing.starting_bid)
+
+        # Validation of the bid
+        if bid_amount <= current_price:
+            return render(request, "auctions/listing_detail.html", {
+                "listing": listing,
+                "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
+                "error_message": f"Your bid must be higher than the current price (${current_price})."
+            })
+        
+        # Update listing price
+        listing.starting_bid = bid_amount
+        listing.save()
+        
+        return render(request, "auctions/listing_detail.html", {
+                "listing": listing,
+                "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
+                "success_message": "Your bid was placed successfully!"
+            })
+        
+    return redirect("listing_detail", listing_id=listing_id)

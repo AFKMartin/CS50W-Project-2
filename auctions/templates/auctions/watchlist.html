@@ -8,61 +8,61 @@
 <div class="container mt-4">
 
     {% if listings %}
-        {% for listing in listings %}
+    {% for listing in listings %}
 
-        <div class="card mb-4 shadow-sm">
+    <div class="card mb-4 shadow-sm">
 
-            <!-- Card header (Title + View button) -->
-            <div class="card-header bg-light text-dark d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <a href="{% url 'listing_detail' listing.id %}" class="text-primary text-decoration-none">
-                        {{ listing.title }}
-                    </a>
-                </h5>
-
-                <a href="{% url 'listing_detail' listing.id %}" class="btn btn-sm btn-outline-primary">
-                    View
+        <!-- Card header (Title + View button) -->
+        <div class="card-header bg-light text-dark d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <a href="{% url 'listing_detail' listing.id %}" class="text-primary text-decoration-none">
+                    {{ listing.title }}
                 </a>
-            </div>
+            </h5>
 
-            <!-- Card body -->
-            <div class="card-body d-flex flex-wrap align-items-start">
-
-                <!-- Image -->
-                <div class="listing-image">
-                    {% if listing.image_url %}
-                        <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
-                    {% else %}
-                        <div class="no-image">No Image</div>
-                    {% endif %}
-                </div>
-
-                <!-- Listing Info -->
-                <div class="listing-info">
-                    <p><strong>Price:</strong> ${{ listing.starting_bid }}</p>
-                    <p>{{ listing.description }}</p>
-
-                    <p><strong>Category:</strong>
-                        {% if listing.category %}
-                            {{ listing.category.name }}
-                        {% else %}
-                            None
-                        {% endif %}
-                    </p>
-
-                    {% if listing.creation_date %}
-                        <p><small class="text-muted">
-                            Created at: {{ listing.creation_date|date:"F j, Y, g:i a" }}
-                        </small></p>
-                    {% endif %}
-                </div>
-
-            </div>
+            <a href="{% url 'listing_detail' listing.id %}" class="btn btn-sm btn-outline-primary">
+                View
+            </a>
         </div>
 
-        {% endfor %}
+        <!-- Card body -->
+        <div class="card-body d-flex flex-wrap align-items-start">
+
+            <!-- Image -->
+            <div class="listing-image">
+                {% if listing.image_url %}
+                <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                {% else %}
+                <div class="no-image">No Image</div>
+                {% endif %}
+            </div>
+
+            <!-- Listing Info -->
+            <div class="listing-info">
+                <p><strong>Current price:</strong> ${{ listing.starting_bid }}</p>
+                <p>{{ listing.description }}</p>
+
+                <p><strong>Category:</strong>
+                    {% if listing.category %}
+                    {{ listing.category.name }}
+                    {% else %}
+                    None
+                    {% endif %}
+                </p>
+
+                {% if listing.creation_date %}
+                <p><small class="text-muted">
+                        Created at: {{ listing.creation_date|date:"F j, Y, g:i a" }}
+                    </small></p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    {% endfor %}
     {% else %}
-        <p class="text-muted">Your watchlist is empty.</p>
+    <p class="text-muted">Your watchlist is empty.</p>
     {% endif %}
 
 </div>

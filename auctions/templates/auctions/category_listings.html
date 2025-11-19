@@ -10,7 +10,7 @@
 <h2>Category: "{{ category.name }}"</h2>
 
 <div class="container">
-{% for listing in listings %}
+    {% for listing in listings %}
     <div class="card mb-4 shadow-sm">
 
         <!-- Card header (Title + Actions) -->
@@ -27,27 +27,27 @@
             <div class="d-flex align-items-center">
 
                 {% if user.is_authenticated %}
-                
-                    <!-- Watchlist button -->
-                    {% if listing in watching %}
-                        <a href="{% url 'toggle_watchlist' listing.id %}" class="btn btn-sm btn-outline-secondary me-2">
-                            Remove Watchlist
-                        </a>
-                    {% else %}
-                        <a href="{% url 'toggle_watchlist' listing.id %}" class="btn btn-sm btn-outline-primary me-2">
-                            Add to Watchlist
-                        </a>
-                    {% endif %}
 
-                    <!-- Close + Delete (only for owner) -->
-                    {% if user == listing.owner %}
-                        <a href="{% url 'close_listing' listing.id %}" class="btn btn-sm btn-outline-warning me-2">
-                            Close
-                        </a>
-                        <a href="{% url 'delete_listing' listing.id %}" class="btn btn-sm btn-outline-danger">
-                            Delete
-                        </a>
-                    {% endif %}
+                <!-- Watchlist button -->
+                {% if listing in watching %}
+                <a href="{% url 'toggle_watchlist' listing.id %}" class="btn btn-sm btn-outline-secondary me-2">
+                    Remove Watchlist
+                </a>
+                {% else %}
+                <a href="{% url 'toggle_watchlist' listing.id %}" class="btn btn-sm btn-outline-primary me-2">
+                    Add to Watchlist
+                </a>
+                {% endif %}
+
+                <!-- Close + Delete (only for owner) -->
+                {% if user == listing.owner %}
+                <a href="{% url 'close_listing' listing.id %}" class="btn btn-sm btn-outline-warning me-2">
+                    Close
+                </a>
+                <a href="{% url 'delete_listing' listing.id %}" class="btn btn-sm btn-outline-danger">
+                    Delete
+                </a>
+                {% endif %}
                 {% endif %}
 
             </div>
@@ -56,35 +56,35 @@
         <!-- Card body -->
         <div class="card-body d-flex flex-wrap align-items-start">
 
-            <!-- Image --> 
+            <!-- Image -->
             <div class="listing-image">
                 {% if listing.image_url %}
-                    <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
                 {% else %}
-                    <div class="no-image">No Image</div>
+                <div class="no-image">No Image</div>
                 {% endif %}
             </div>
 
             <!-- Listing Info -->
             <div class="listing-info">
-                <p><strong>Price:</strong> ${{ listing.starting_bid }}</p>
+                <p><strong>Current price:</strong> ${{ listing.starting_bid }}</p>
                 <p>{{ listing.description }}</p>
                 <p><strong>Category:</strong>
                     {% if listing.category %}
-                        {{ listing.category.name }}
+                    {{ listing.category.name }}
                     {% else %}
-                        None
+                    None
                     {% endif %}
                 </p>
                 {% if listing.creation_date %}
-                    <p><small class="text-muted">Created at: {{ listing.creation_date|date:"F j, Y, g:i a" }}</small></p>
+                <p><small class="text-muted">Created at: {{ listing.creation_date|date:"F j, Y, g:i a" }}</small></p>
                 {% endif %}
             </div>
         </div>
     </div>
-{% empty %}
+    {% empty %}
     <p>No listings found for this category.</p>
-{% endfor %}
+    {% endfor %}
 </div>
 
 {% endblock %}
