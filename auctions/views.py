@@ -1,26 +1,27 @@
 from django.contrib.auth import authenticate, login, logout
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
+from django.db.models import Max
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import AuctionListing, Category, Watchlist
-
+from .models import *
+from decimal import Decimal, InvalidOperation
 from .models import User
 
 def index(request):
     active_listings = AuctionListing.objects.filter(is_active=True)
-
-    watching = []    
+    watching = []
+    unread_notifications = 0
 
     if request.user.is_authenticated:
-        watching = AuctionListing.objects.filter(
-            watchlisted_by__user=request.user
-        )
+        watching = request.user.watchlist_items.values_list('listing', flat=True)
+        unread_notifications = Notification.objects.filter(user=request.user, read=False).count()
 
     return render(request, "auctions/index.html", {
         "listings": active_listings,
-        "watching": watching
+        "watching": AuctionListing.objects.filter(id__in=watching),
+        "unread_notifications": unread_notifications
     })
 
 def login_view(request):
@@ -86,6 +87,13 @@ def close_listing(request, listing_id):
     # Set listing active to false
     listing.is_active = False
     listing.save()
+
+    # Create notification
+    if highest_bid is not None:
+        Notification.objects.create(
+            user=highest_bid.user,
+            message=f"You won the auction for '{listing.title}' with a bid of {highest_bid.amount}!"
+        )
 
     return redirect("listing_detail", listing_id=listing_id)
 
@@ -167,7 +175,6 @@ def watchlist(request):
         "listings": watched_listings
     })
 
-
 def listing_detail(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
     
@@ -198,45 +205,66 @@ def toggle_watchlist(request, listing_id):
 @login_required
 def place_bid(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
-    
+
     if request.method == "POST":
         bid_raw = request.POST.get("bid_amount")
 
-        # Check if bid is null
+        # If empty value
         if not bid_raw:
             return render(request, "auctions/listing_detail.html", {
                 "listing": listing,
                 "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
-                "error_message": "Please enter a bid amount."
-            }) 
-        
+                "error_message": "Error, you need to enter a bid amount."
+            })
+
+        # Convert to decimal
         try:
-            bid_amount = float(bid_raw)
-        except ValueError:
+            bid_amount = Decimal(bid_raw)
+        except (InvalidOperation, ValueError):
             return render(request, "auctions/listing_detail.html", {
                 "listing": listing,
                 "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
                 "error_message": "Invalid bid value."
             })
 
-        current_price = float(listing.starting_bid)
+        # Determine the current price
+        highest = listing.bids.aggregate(max_amount=Max('amount'))["max_amount"]
+        current_price = listing.starting_bid if highest is None else highest
 
-        # Validation of the bid
+        # Validate bid
         if bid_amount <= current_price:
             return render(request, "auctions/listing_detail.html", {
                 "listing": listing,
                 "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
                 "error_message": f"Your bid must be higher than the current price (${current_price})."
             })
-        
-        # Update listing price
-        listing.starting_bid = bid_amount
-        listing.save()
-        
+
+        # Create the bid
+        with transaction.atomic():
+            Bid.objects.create(
+                auction_listing=listing,
+                user=request.user,
+                amount=bid_amount
+            )
+            listing.starting_bid = bid_amount
+            listing.save()
+
         return render(request, "auctions/listing_detail.html", {
-                "listing": listing,
-                "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
-                "success_message": "Your bid was placed successfully!"
-            })
-        
+            "listing": listing,
+            "is_watching": Watchlist.objects.filter(user=request.user, listing=listing).exists(),
+            "success_message": "Your bid was placed successfully!"
+        })
+
     return redirect("listing_detail", listing_id=listing_id)
+
+@login_required
+def notifications(request):
+    user_notifications = Notification.objects.filter(user=request.user).order_by("-created")
+    return render(request, "auctions/notifications.html", {"notifications": user_notifications})  
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notif = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notif.read = True
+    notif.save()
+    return redirect("notifications")

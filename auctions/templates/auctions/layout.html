@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     {% block head %}{% endblock %}
 </head>
@@ -19,9 +20,21 @@
     </div>
 
     <!-- Top-right user greeting -->
-    <div class="container d-flex justify-content-end mb-2">
+    <div class="container d-flex justify-content-end mb-2 align-items-center">
         {% if user.is_authenticated %}
-            <span>Hello, <strong>{{ user.username }}</strong>!</span>
+            <span class="me-3">Hello, <strong>{{ user.username }}</strong>!</span>
+
+            <a class="position-relative text-decoration-none" href="{% url 'notifications' %}">
+                <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+                {% with unread_notifications as unread_count %}
+                    {% if unread_count > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ unread_count }}
+                            <span class="visually-hidden">unread notifications</span>
+                        </span>
+                    {% endif %}
+                {% endwith %}
+            </a>
         {% else %}
             <span>Not signed in</span>
         {% endif %}
@@ -45,7 +58,6 @@
                     <a class="nav-link" href="{% url 'closed_listings' %}">Closed Listings</a>
                 </li>
 
-                <!-- Left Links when logged in-->
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'categories' %}">Categories</a>

@@ -1,0 +1,40 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'auctions/styles.css' %}">
+{% endblock %}
+
+{% block body %}
+
+<h2>Your Notifications</h2>
+
+<div class="container">
+    {% if notifications %}
+        <div class="list-group">
+            {% for notif in notifications %}
+            <div class="list-group-item d-flex justify-content-between align-items-center {% if not notif.read %}list-group-item-info{% endif %}">
+                
+                <!-- Notification message -->
+                <div>
+                    {{ notif.message }}
+                    <br>
+                    <small class="text-muted">{{ notif.created|date:"F j, Y, g:i a" }}</small>
+                </div>
+
+                <!-- Mark as read button -->
+                {% if not notif.read %}
+                <form method="post" action="{% url 'mark_notification_read' notif.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Mark as read</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You have no notifications.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
