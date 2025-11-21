@@ -7,7 +7,6 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import *
 from decimal import Decimal, InvalidOperation
-from .models import User
 
 def index(request):
     active_listings = AuctionListing.objects.filter(is_active=True)
@@ -177,15 +176,28 @@ def watchlist(request):
 
 def listing_detail(request, listing_id):
     listing = get_object_or_404(AuctionListing, pk=listing_id)
+    comments = listing.comments.all().order_by("-timestamp")
     
     # Determine if the user is watching this listing
     is_watching = False
     if request.user.is_authenticated:
         is_watching = Watchlist.objects.filter(user=request.user, listing=listing).exists()
+    
+    # If user submits a comment
+    if request.method == "POST":
+        text_comment = request.POST.get("comment")
+        if text_comment.strip() != "":
+            Comment.objects.create(
+                auction_listing=listing,
+                user=request.user,
+                text_comment=text_comment
+            )
+        return redirect("listing_detail", listing_id=listing_id)
 
     return render(request, "auctions/listing_detail.html", {
         "listing": listing,
-        "is_watching": is_watching
+        "is_watching": is_watching,
+        "comments": comments
     })
 
 @login_required

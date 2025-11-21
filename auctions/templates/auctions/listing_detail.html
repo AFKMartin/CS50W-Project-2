@@ -121,4 +121,42 @@
     </div>
 </div>
 
+
+<!-- Comments Section -->
+<div class="container mt-4">
+
+    <h3>Comments</h3>
+
+    <!-- Display comments -->
+    <ul class="list-group mb-4">
+        {% for comment in comments %}
+        <li class="list-group-item">
+            <strong>{{ comment.user.username }}</strong>
+            <span class="text-muted" style="font-size: 0.85rem;">
+                • {{ comment.timestamp|date:"F j, Y, g:i a" }}
+            </span>
+            <br>
+            {{ comment.text_comment }}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No comments yet.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Comment form -->
+    {% if user.is_authenticated %}
+    <form action="{% url 'listing_detail' listing.id %}" method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <textarea name="comment" rows="3" class="form-control"
+                placeholder="Write a comment..."></textarea>
+        </div>
+        <button class="btn btn-primary">Post Comment</button>
+    </form>
+    {% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
+    {% endif %}
+
+</div>
+
 {% endblock %}

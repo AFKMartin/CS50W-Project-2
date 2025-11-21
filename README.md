@@ -22,7 +22,7 @@
 
   - [x] If a user is signed in on a closed listing page, and the user has won that auction, the page should say so.
 
-  - [ ] Users who are signed in should be able to add comments to the listing page. The listing page should display all comments that have been made on the listing.
+  - [x] Users who are signed in should be able to add comments to the listing page. The listing page should display all comments that have been made on the listing.
 
 ---
 
