@@ -37,4 +37,4 @@
 ---
 
 ### Django Admin Interface
-- [ ] Via the Django admin interface, a site administrator should be able to view, add, edit, and delete any listings, comments, and bids made on the site.
+- [x] Via the Django admin interface, a site administrator should be able to view, add, edit, and delete any listings, comments, and bids made on the site.
